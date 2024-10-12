@@ -1,6 +1,6 @@
 const Booking = require('../models/Booking');
 const { calculateBookingCost} = require('../services/bookingService');
-const { queueDriverAssignment } = require('../services/driverQueue');
+const { queueDriverAssignment } = require('../services/PostBookingActionsQueue');
 const { getDistance, getSurgeMultiplier } = require('../utils/geolocation');
 
 exports.createBooking = async (req, res) => {
