@@ -1,27 +1,61 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Driver = require('../models/Driver');
 
 exports.protect = async (req, res, next) => {
-    let token;
+  let token;
 
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        try {
-            // Get token from header
-            token = req.headers.authorization.split(' ')[1];
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    try {
+      token = req.headers.authorization.split(' ')[1];
 
-            // Verify token
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-            // Get user from the token and exclude password
-            req.user = await User.findById(decoded.id).select('-password');
+      // Check if the decoded token has a 'type' field
+      if (!decoded.type) {
+        return res.status(401).json({ message: 'Not authorized, invalid token structure' });
+      }
 
-            next();
-        } catch (error) {
-            return res.status(401).json({ message: 'Not authorized, token failed' });
+      // Attach user or driver to the request based on token type
+      if (decoded.type === 'user') {
+        const user = await User.findById(decoded.id).select('-password');
+        if (!user) {
+          return res.status(401).json({ message: 'Not authorized, user not found' });
         }
-    }
+        req.user = user;
+      } else if (decoded.type === 'driver') {
+        const driver = await Driver.findById(decoded.id).select('-password');
+        if (!driver) {
+          return res.status(401).json({ message: 'Not authorized, driver not found' });
+        }
+        req.driver = driver;
+      } else {
+        return res.status(401).json({ message: 'Not authorized, invalid token type' });
+      }
 
-    if (!token) {
-        return res.status(401).json({ message: 'Not authorized, no token' });
+      next();
+    } catch (error) {
+      console.error(error);
+      return res.status(401).json({ message: 'Not authorized, token failed' });
     }
+  } else {
+    return res.status(401).json({ message: 'Not authorized, no token' });
+  }
+};
+
+exports.authorizeUser = (req, res, next) => {
+  if (req.user) {
+    next();
+  } else {
+    res.status(403).json({ message: 'Access denied. User authorization required.' });
+  }
+};
+
+exports.authorizeDriver = (req, res, next) => {
+  if (req.driver) {
+    next();
+  } else {
+    res.status(403).json({ message: 'Access denied. Driver authorization required.' });
+  }
 };

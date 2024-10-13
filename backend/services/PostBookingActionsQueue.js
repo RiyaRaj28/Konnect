@@ -56,17 +56,12 @@ const worker = new Worker('driver-assignments', async (job) => {
 
   logAllDrivers();
 
-
     console.log(`Found ${drivers.length} available drivers`);
 
     if (drivers.length === 0) {
-      await Booking.findByIdAndUpdate(bookingId, { status: 'no_driver_available' });
+      await Booking.findByIdAndUpdate(bookingId, { status: 'no_driver_available', runValidators: false });
       throw new Error('No available drivers found');
     }
-
-   
-
-
 
     const assignedDriver = drivers[0];
 
@@ -74,7 +69,7 @@ const worker = new Worker('driver-assignments', async (job) => {
       bookingId,
       { 
         driverId: assignedDriver._id,
-        status: 'driver_assigned'
+        status: 'pending'
       },
       { new: true }
     );
@@ -83,8 +78,8 @@ const worker = new Worker('driver-assignments', async (job) => {
       throw new Error(`Booking ${bookingId} not found`);
     }
 
-    assignedDriver.isAvailable = false;
-    await assignedDriver.save();
+    // assignedDriver.isAvailable = false;
+    await assignedDriver.save({validateBeforeSave: false});
 
     console.log(`Driver ${assignedDriver._id} assigned to booking ${bookingId}`);
 
@@ -117,7 +112,7 @@ async function queueDriverAssignment(bookingId, pickupLocation, vehicleType) {
       attempts: 3,
       backoff: {
         type: 'exponential',
-        delay: 1000
+        // delay: 1000
       }
     });
 
@@ -130,5 +125,7 @@ async function queueDriverAssignment(bookingId, pickupLocation, vehicleType) {
 }
 
 module.exports = {
-  queueDriverAssignment
+  queueDriverAssignment,
+  redisConnection,
+  driverQueue
 };

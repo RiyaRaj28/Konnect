@@ -1,8 +1,11 @@
 const express = require('express');
-const { acceptJob, updateLocation } = require('../controllers/driverController');
+const { registerDriver, loginDriver, acceptJob, updateLocation } = require('../controllers/driverController');
+const { protect, authorizeDriver } = require('../middleware/authMiddleware');
 const router = express.Router();
 
-router.post('/accept-job', acceptJob);
-router.post('/update-location', updateLocation);
+router.post('/register', registerDriver);
+router.post('/login', loginDriver);
+router.post('/accept-job', protect, authorizeDriver, acceptJob);  // Protected route
+router.post('/update-location', protect, authorizeDriver, updateLocation);  // Protected route
 
 module.exports = router;
