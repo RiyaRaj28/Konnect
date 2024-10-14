@@ -162,3 +162,44 @@ exports.getUserBookings = async (req, res) => {
     res.status(500).json({ message: 'Error fetching bookings', error: error.message });
   }
 };
+
+exports.rateBooking = async (req, res) => {
+  console.log("ratingmjipo");
+  const { bookingId, rating } = req.body;
+  const userId = req.user._id;
+
+  try {
+    // Validate rating
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ message: 'Rating must be between 1 and 5' });
+    }
+
+    // Find the booking
+    const booking = await Booking.findOne({ _id: bookingId, userId: userId });
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found or not associated with this user' });
+    }
+
+    // Check if the booking is already rated
+    if (booking.rating !== null) {
+      return res.status(400).json({ message: 'This booking has already been rated' });
+    }
+
+    // Update the booking with the rating
+    booking.rating = rating;
+    await booking.save();
+
+    // Update the driver's aggregate rating
+    const driver = await Driver.findById(booking.driverId);
+    if (driver) {
+      driver.totalRatings += 1;
+      driver.aggregateRating = ((driver.aggregateRating * (driver.totalRatings - 1)) + rating) / driver.totalRatings;
+      await driver.save();
+    }
+
+    res.status(200).json({ message: 'Booking rated successfully', booking });
+  } catch (error) {
+    console.error('Error rating booking:', error);
+    res.status(500).json({ message: 'Error rating booking', error: error.message });
+  }
+};

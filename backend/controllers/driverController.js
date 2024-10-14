@@ -19,21 +19,27 @@ exports.registerDriver = async (req, res) => {
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Prepare the location object
+    const driverLocation = {
+      type: 'Point',
+      coordinates: location && Array.isArray(location) ? location : [0, 0] // Default to [0, 0] if not provided
+    };
+
     // Create a new driver
     const newDriver = new Driver({
       name,
       vehicleType,
-      isAvailable,
+      isAvailable: isAvailable !== undefined ? isAvailable : true,
       email,
       password: hashedPassword,
-      location,
-      status
+      location: driverLocation,
+      status: status || 'idle'
     });
 
     await newDriver.save();
     
     // Generate JWT token
-    const token = jwt.sign({id: newDriver._id, type: 'driver'}, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({id: newDriver._id, type: 'driver'}, process.env.JWT_SECRET, { expiresIn: '30d' });
 
     res.status(201).json({ message: 'Driver registered successfully', token });
   } catch (error) {
@@ -157,5 +163,42 @@ exports.updateLocation = async (req, res) => {
     res.status(200).json({ message: 'Location updated successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error updating location', error });
+  }
+};
+
+exports.getPendingBookings = async (req, res) => {
+  try {
+    const driverId = req.driver._id;
+
+    // Find all bookings assigned to this driver with 'pending' status
+    const pendingBookings = await Booking.find({
+      driverId: driverId,
+      status: 'pending'
+    }).populate('userId', 'name email');
+
+    // Format the response data
+    const formattedBookings = pendingBookings.map(booking => ({
+      id: booking._id,
+      userName: booking.userId.name,
+      userEmail: booking.userId.email,
+      pickupLocation: booking.pickupLocation,
+      dropoffLocation: booking.dropoffLocation,
+      vehicleType: booking.vehicleType,
+      estimatedPrice: booking.estimatedPrice,
+      createdAt: booking.createdAt
+    }));
+
+    res.status(200).json({
+      success: true,
+      count: formattedBookings.length,
+      data: formattedBookings
+    });
+  } catch (error) {
+    console.error('Error fetching pending bookings:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching pending bookings',
+      error: error.message
+    });
   }
 };

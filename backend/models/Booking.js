@@ -8,6 +8,7 @@ const BookingSchema = new mongoose.Schema({
   vehicleType: String,
   status: { type: String, enum: ['pending', 'accepted','completed'], default: 'pending' },
   estimatedPrice: Number,
+  rating: { type: Number, min: 1, max: 5, default: null },
   createdAt: { type: Date, default: Date.now }
 });
 

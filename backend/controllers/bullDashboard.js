@@ -4,7 +4,7 @@ const { ExpressAdapter } = require('@bull-board/express');
 const express = require('express');
 
 const { driverQueue } = require('../services/PostBookingActionsQueue'); // Adjust the path as needed
-console.log(driverQueue);
+// console.log(driverQueue);
 
 
 function setupBullDashboard(app) {
