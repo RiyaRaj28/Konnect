@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Tabs, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography } from '@mui/material';
+import { Tabs, Tab, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box, Card, CardContent, Grid } from '@mui/material';
 import {
   getTotalDrivers,
   getIdleDrivers,
@@ -150,22 +150,97 @@ const AdminDashboard = () => {
     </TableContainer>
   );
 
+  const renderSummaryCards = () => (
+    <Grid container spacing={2} sx={{ mb: 4 }}>
+      <Grid item xs={12} sm={6} md={3}>
+        <Card>
+          <CardContent>
+            <Typography variant="h6">Total Drivers</Typography>
+            <Typography variant="h4">{totalDrivers.length}</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <Card>
+          <CardContent>
+            <Typography variant="h6">Idle Drivers</Typography>
+            <Typography variant="h4">{idleDrivers.length}</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <Card>
+          <CardContent>
+            <Typography variant="h6">En-Route Drivers</Typography>
+            <Typography variant="h4">{enRouteDrivers.length}</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <Card>
+          <CardContent>
+            <Typography variant="h6">Total Users</Typography>
+            <Typography variant="h4">{users.length}</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+    </Grid>
+  );
+
+  const renderBookingSummaryCards = () => (
+    <Grid container spacing={2} sx={{ mb: 4 }}>
+      <Grid item xs={12} sm={6} md={3}>
+        <Card>
+          <CardContent>
+            <Typography variant="h6">Total Bookings</Typography>
+            <Typography variant="h4">{totalBookings.length}</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <Card>
+          <CardContent>
+            <Typography variant="h6">Pending Bookings</Typography>
+            <Typography variant="h4">{pendingBookings.length}</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <Card>
+          <CardContent>
+            <Typography variant="h6">Accepted Bookings</Typography>
+            <Typography variant="h4">{acceptedBookings.length}</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+      <Grid item xs={12} sm={6} md={3}>
+        <Card>
+          <CardContent>
+            <Typography variant="h6">Completed Bookings</Typography>
+            <Typography variant="h4">{completedBookings.length}</Typography>
+          </CardContent>
+        </Card>
+      </Grid>
+    </Grid>
+  );
+
   return (
-    <div>
+    <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
         Admin Dashboard
       </Typography>
-      <Tabs value={value} onChange={handleChange}>
+      {renderSummaryCards()}
+      <Tabs value={value} onChange={handleChange} sx={{ mb: 2 }}>
         <Tab label="Drivers" />
         <Tab label="Bookings" />
         <Tab label="Users" />
       </Tabs>
       {value === 0 && (
         <div>
-          <Tabs value={driversValue} onChange={handleDriversChange}>
-            <Tab label="Total Drivers" />
-            <Tab label="Idle Drivers" />
-            <Tab label="En-Route Drivers" />
+          <Tabs value={driversValue} onChange={handleDriversChange} sx={{ mb: 2 }}>
+            <Tab label={`Total Drivers (${totalDrivers.length})`} />
+            <Tab label={`Idle Drivers (${idleDrivers.length})`} />
+            <Tab label={`En-Route Drivers (${enRouteDrivers.length})`} />
           </Tabs>
           {driversValue === 0 && renderDriversTable(totalDrivers)}
           {driversValue === 1 && renderDriversTable(idleDrivers)}
@@ -174,11 +249,12 @@ const AdminDashboard = () => {
       )}
       {value === 1 && (
         <div>
-          <Tabs value={bookingsValue} onChange={handleBookingsChange}>
-            <Tab label="Total Bookings" />
-            <Tab label="Pending Bookings" />
-            <Tab label="Accepted Bookings" />
-            <Tab label="Completed Bookings" />
+          {renderBookingSummaryCards()}
+          <Tabs value={bookingsValue} onChange={handleBookingsChange} sx={{ mb: 2 }}>
+            <Tab label={`Total Bookings (${totalBookings.length})`} />
+            <Tab label={`Pending Bookings (${pendingBookings.length})`} />
+            <Tab label={`Accepted Bookings (${acceptedBookings.length})`} />
+            <Tab label={`Completed Bookings (${completedBookings.length})`} />
           </Tabs>
           {bookingsValue === 0 && renderBookingsTable(totalBookings)}
           {bookingsValue === 1 && renderBookingsTable(pendingBookings)}
@@ -186,8 +262,15 @@ const AdminDashboard = () => {
           {bookingsValue === 3 && renderBookingsTable(completedBookings)}
         </div>
       )}
-      {value === 2 && renderUsersTable()}
-    </div>
+      {value === 2 && (
+        <div>
+          <Typography variant="h6" gutterBottom>
+            Total Users: {users.length}
+          </Typography>
+          {renderUsersTable()}
+        </div>
+      )}
+    </Box>
   );
 };
 
