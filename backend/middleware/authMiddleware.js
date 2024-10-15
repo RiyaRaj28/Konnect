@@ -4,17 +4,20 @@ const Driver = require('../models/Driver');
 
 exports.protect = async (req, res, next) => {
   let token;
+  // console.log('Headers:', req.headers);
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
     try {
       token = req.headers.authorization.split(' ')[1];
 
+      // console.log('Extracted token:', token);
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // console.log('Decoded token:', decoded);
 
       // Check if the decoded token has a 'type' field
       if (!decoded.type) {
-        return res.status(401).json({ message: 'Not authorized, invalid token structure' });
+        return res.status(401).json({ message: 'Not authorized, invalid token structureee' });
       }
 
       // Attach user or driver to the request based on token type

@@ -1,26 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { getPendingBookings } from '../services/api';
-import { Card, CardContent, Typography, List, ListItem, ListItemText, Divider } from '@/components/ui';
 
 export default function PendingBookings() {
   const [pendingBookings, setPendingBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
-
   useEffect(() => {
     const fetchPendingBookings = async () => {
       try {
         const response = await getPendingBookings();
-        if (response.data && response.data.success) {
-          setPendingBookings(response.data.data);
+        console.log("Full API response:", response);
+        
+        if (response && response.success) {
+          console.log("Pending bookings data:", response.data);
+          setPendingBookings(response.data || []);
         } else {
+          console.error("API request was not successful:", response);
           setError('Failed to fetch pending bookings');
         }
-        setLoading(false);
       } catch (err) {
+        console.error("Error in fetchPendingBookings:", err);
         setError('Failed to fetch pending bookings');
+      } finally {
         setLoading(false);
       }
     };
@@ -28,55 +30,34 @@ export default function PendingBookings() {
     fetchPendingBookings();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  console.log("Current pendingBookings state:", pendingBookings);
+
+  if (loading) return <div className="text-center p-4">Loading...</div>;
+  if (error) return <div className="text-center p-4 text-red-500">{error}</div>;
 
   return (
-    <Card className="w-full max-w-3xl mx-auto">
-      <CardContent>
-        <Typography variant="h5" component="h2" className="mb-4">
-          Pending Bookings
-        </Typography>
+    <div className="w-full max-w-3xl mx-auto bg-white shadow-md rounded-lg overflow-hidden">
+      <div className="p-6">
+        <h2 className="text-2xl font-bold mb-4">Pending Bookings</h2>
         {pendingBookings.length === 0 ? (
-          <Typography>No pending bookings</Typography>
+          <p>No pending bookings</p>
         ) : (
-          <List>
-            {pendingBookings.map((booking, index) => (
-              <React.Fragment key={booking.id}>
-                {index > 0 && <Divider />}
-                <ListItem>
-                  <ListItemText
-                    primary={`Booking ID: ${booking.id}`}
-                    secondary={
-                      <>
-                        <Typography component="span" variant="body2" color="text.primary">
-                          User: {booking.userName} ({booking.userEmail})
-                        </Typography>
-                        <br />
-                        <Typography component="span" variant="body2">
-                          Vehicle Type: {booking.vehicleType}
-                        </Typography>
-                        <br />
-                        <Typography component="span" variant="body2">
-                          Estimated Price: ${booking.estimatedPrice.toFixed(2)}
-                        </Typography>
-                        <br />
-                        <Typography component="span" variant="body2">
-                          Pickup: {booking.pickupLocation.join(', ')}
-                        </Typography>
-                        <br />
-                        <Typography component="span" variant="body2">
-                          Dropoff: {booking.dropoffLocation.join(', ')}
-                        </Typography>
-                      </>
-                    }
-                  />
-                </ListItem>
-              </React.Fragment>
+          <ul className="divide-y divide-gray-200">
+            {pendingBookings.map((booking) => (
+              <li key={booking.id} className="py-4">
+                <div className="flex flex-col space-y-1">
+                  <p className="font-semibold">Booking ID: {booking.id}</p>
+                  <p>User: {booking.userName} ({booking.userEmail})</p>
+                  <p>Vehicle Type: {booking.vehicleType}</p>
+                  <p>Estimated Price: ${booking.estimatedPrice.toFixed(2)}</p>
+                  <p>Pickup: {booking.pickupLocation.join(', ')}</p>
+                  <p>Dropoff: {booking.dropoffLocation.join(', ')}</p>
+                </div>
+              </li>
             ))}
-          </List>
+          </ul>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

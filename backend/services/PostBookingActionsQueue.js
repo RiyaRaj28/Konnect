@@ -117,6 +117,7 @@ async function queueDriverAssignment(bookingId, pickupLocation, vehicleType) {
     });
 
     console.log(`Driver assignment job ${job.id} added to queue for booking ${bookingId}`);
+    console.log("Driver assigned also from queue", job.data)
     return job.id;
   } catch (error) {
     console.error('Error adding job to queue:', error);

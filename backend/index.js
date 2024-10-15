@@ -43,6 +43,11 @@ app.get('/test-error', (req, res, next) => {
   throw new Error('This is a test error');
 });
 
+// app.get('/test-error2', (req, res, next) => {
+//   console.log('Test error route hit');
+//   throw new Error('This is a test error');
+// });
+
 // API Routes
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/drivers', driverRoutes);

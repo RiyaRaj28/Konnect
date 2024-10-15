@@ -84,7 +84,7 @@ export default function Register() {
               onChange={handleChange}
               row
             >
-              <FormControlLabel value="user" control={<Radio />} label="User" />
+              <FormControlLabel value="user" control={<Radio />} label="Userr" />
               <FormControlLabel value="driver" control={<Radio />} label="Driver" />
             </RadioGroup>
           </FormControl>

@@ -2,15 +2,16 @@ const axios = require('axios');
 
 // Calculate distance between two locations using DistanceMatrix.ai API
 async function getDistance(pickupLocation, dropoffLocation) {
-    const apiKey = process.env.DISTANCE_MATRIX_API_KEY;
+    const apiKey = process.env.GOOGLE_API_KEY;
     
     // Format the origin and destination for the request
-    const origin = `${pickupLocation[0]},${pickupLocation[1]}`;
-    const destination = `${dropoffLocation[0]},${dropoffLocation[1]}`;
+    const origin = `${pickupLocation[1]},${pickupLocation[0]}`;
+    const destination = `${dropoffLocation[1]},${dropoffLocation[0]}`;
 
     console.log("Origin:", origin, "Destination:", destination);
+    const url = `https://maps.googleapis.com/maps/api/distancematrix/json?destinations=${origin}&origins=${destination}&units=imperial&key=${apiKey}`;
 
-    const url = `https://api.distancematrix.ai/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&key=${apiKey}`;
+    // const url = `https://api.distancematrix.ai/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&key=${apiKey}`;
     console.log("API URL:", url);
 
     try {
@@ -30,8 +31,8 @@ async function getDistance(pickupLocation, dropoffLocation) {
                 durationInMinutes: durationInSeconds / 60 
             };
         } else {
-            console.log("Unexpected response from DistanceMatrix API:", response.data);
-            throw new Error("Invalid response from DistanceMatrix API");
+            console.log("Unexpected response from  API:", response.data);
+            throw new Error("Invalid response from API");
         }
     } catch (error) {
         console.error("Error fetching distance:", error.message);

@@ -59,9 +59,11 @@ exports.loginUser = async (req, res) => {
     // Check if the password is correct
     const isMatch = await bcrypt.compare(password, existingAccount.password);
     if (!isMatch) return res.status(400).json({ msg: 'Invalid credentials' });
+    // console.log("existingAccount", existingAccount);
 
-    // Generate a token
-    const token = jwt.sign({ id: existingAccount._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    // Generate a token using the same function as in registration
+    // const token = generateToken(existingAccount._id);
+    const token = jwt.sign({id: existingAccount._id, type: 'user'}, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     res.json({
       token,

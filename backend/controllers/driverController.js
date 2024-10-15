@@ -202,3 +202,93 @@ exports.getPendingBookings = async (req, res) => {
     });
   }
 };
+
+exports.getTotalEarning = async (req, res) => {
+  try {
+    const driverId = req.driver._id; // Assuming you have middleware to set req.driver
+
+    const completedBookings = await Booking.find({
+      driverId: driverId,
+      status: 'completed'
+    }).populate('userId', 'name').sort({ completedAt: -1 });
+
+    const totalEarnings = completedBookings.reduce((sum, booking) => sum + booking.estimatedPrice, 0);
+
+    const formattedBookings = completedBookings.map(booking => ({
+      ...booking.toObject(),
+      userName: booking.userId.name
+    }));
+
+    res.json({
+      success: true,
+      data: formattedBookings,
+      totalEarnings: totalEarnings
+    });
+  } catch (error) {
+    console.error('Error fetching completed bookings:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching completed bookings',
+      error: error.message
+    });
+  }
+};
+
+exports.getDriverStatus = async (req, res) => {
+  try {
+    const driverId = req.driver.id; // Extract driverId from token (attached by the auth middleware)
+
+    // Find the driver by ID
+    const driver = await Driver.findById(driverId);
+    
+    if (!driver) {
+      return res.status(404).json({ success: false, message: 'Driver not found' });
+    }
+
+    // Return the driver's status
+    res.status(200).json({ success: true, status: driver.status });
+  } catch (error) {
+    console.error('Error fetching driver status:', error);
+    res.status(500).json({ success: false, message: 'Error fetching driver status', error: error.message });
+  }
+};
+
+exports.getAcceptedBookings = async (req, res) => {
+  try {
+    const driverId = req.driver._id;
+
+    // Find all bookings assigned to this driver with 'accepted' status
+    const acceptedBookings = await Booking.find({
+      driverId: driverId,
+      status: 'accepted'
+    }).populate('userId', 'name email');
+
+    // Format the response data
+    const formattedBookings = acceptedBookings.map(booking => ({
+      id: booking._id,
+      userName: booking.userId.name,
+      userEmail: booking.userId.email,
+      pickupLocation: booking.pickupLocation,
+      dropoffLocation: booking.dropoffLocation,
+      vehicleType: booking.vehicleType,
+      estimatedPrice: booking.estimatedPrice,
+      createdAt: booking.createdAt
+    }));
+
+    res.status(200).json({
+      success: true,
+      count: formattedBookings.length,
+      data: formattedBookings
+    });
+  } catch (error) {
+    console.error('Error fetching accepted bookings:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching accepted bookings',
+      error: error.message
+    });
+  }
+};
+
+// Add this line to the routes file (e.g., routes/driverRoutes.js):
+// router.get('/accepted-bookings', authMiddleware, driverController.getAcceptedBookings);

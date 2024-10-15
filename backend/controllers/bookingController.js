@@ -5,6 +5,8 @@ const { queueDriverAssignment } = require('../services/PostBookingActionsQueue')
 const { getDistance, getSurgeMultiplier } = require('../utils/geolocation');
 const mongoose = require('mongoose');
 
+
+
 exports.createBooking = async (req, res) => {
   const {pickupLocation, dropoffLocation, vehicleType } = req.body;
 
@@ -32,6 +34,7 @@ exports.createBooking = async (req, res) => {
     });
 
     await booking.save();
+    console.log('Booking created:', booking);
 
     // Step 5: Queue driver assignment job
     await queueDriverAssignment(booking._id, pickupLocation, vehicleType);
