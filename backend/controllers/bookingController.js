@@ -94,9 +94,26 @@ exports.updateBookingStatus = async (req, res) => {
 
     // Update the status of the booking
     booking.status = status;
+
+    // Add timing functionality
+    if (status === 'accepted') {
+      booking.startTime = new Date();
+      console.log("Start time:", booking.startTime);
+    } else if (status === 'completed') {
+      booking.endTime = new Date();
+      console.log("End time:", booking.endTime);
+      if (booking.startTime) {
+        const durationInMilliseconds = booking.endTime - booking.startTime;
+        booking.duration = Math.round(durationInMilliseconds / (1000 * 60)); // Duration in minutes
+        console.log("Duration in minutes:", booking.duration);
+      } else {
+        console.warn('Booking completed without a start time');
+      }
+    }
+
     await booking.save();
 
-    // Update driver status based on booking status boo
+    // Update driver status based on booking status
     let updatedDriver;
     if (booking.driverId) {
       let driverUpdate = {};
@@ -129,7 +146,13 @@ exports.updateBookingStatus = async (req, res) => {
 
     res.status(200).json({
       message: `Booking status updated to ${status} successfully`,
-      booking,
+      booking: {
+        _id: booking._id,
+        status: booking.status,
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        duration: booking.duration
+      },
       driver: updatedDriver ? { 
         id: updatedDriver._id, 
         isAvailable: updatedDriver.isAvailable, 

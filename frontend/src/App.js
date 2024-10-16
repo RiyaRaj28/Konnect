@@ -7,6 +7,7 @@ import ViewBookings from './pages/ViewBookings';
 import  DriverDashboard from './pages/DriverDashboard';
 import UpdateBookingStatus from './pages/UpdateBookingStatus';
 import AdminDashboard from './pages/AdminDashboard';
+import UserDashboard from './pages/UserDashboard';
 // import PendingBookings from './pages/PendingBookings';
 
 function App() {
@@ -15,12 +16,12 @@ function App() {
       <Routes>
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/create-booking" element={<CreateBooking />} />
+        <Route path="/user/dashboard" element={<UserDashboard />} />
         <Route path="/view-bookings" element={<ViewBookings />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/driver-dashboard" element={<DriverDashboard />} /> 
         <Route path="/update-booking-status" element={<UpdateBookingStatus />} />
-        <Route path="/" element={<Navigate to="/login" replace />} /> 
+        <Route path="/" element={<Navigate to="/user/dashboard" replace />} /> 
       </Routes>
     </Router>
   );

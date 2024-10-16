@@ -25,7 +25,7 @@ export default function Login() {
       });
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('userType', formData.userType);
-      navigate(formData.userType === 'user' ? '/create-booking' : '/driver-dashboard');
+      navigate(formData.userType === 'user' ? '/user/dashboard' : '/driver-dashboard');
     } catch (error) {
       console.error('Login failed:', error);
     }

@@ -23,8 +23,8 @@ export const login = (credentials) => api.post('/auth/login', credentials);
 
 // User Bookings
 export const createBooking = (bookingData) => api.post('/bookings/book', bookingData);
-export const getUserBookings = () => api.get('bookings/bookings/user');
-export const rateBooking = (bookingId, rating) => api.post(`/booking/${bookingId}/rate`, { rating });
+export const getUserBookings = () => api.get('/bookings/bookings/user');
+export const rateBooking = (bookingId, rating) => api.post('/bookings/booking/rating', { bookingId, rating });
 
 // Driver Functions
 export const registerDriver = (userData) => api.post('/drivers/register', userData);
@@ -47,5 +47,8 @@ export const getPendingBookingsAdmin = () => api.get('/admin/bookings/pending');
 export const getAcceptedBookingsAdmin = () => api.get('/admin/bookings/accepted');
 export const getCompletedBookings = () => api.get('/admin/bookings/completed');
 export const getTotalUsers = () => api.get('/admin/users/total');
+
+// User Dashboard
+export const getUserDashboard = () => api.get('/user/dashboard');
 
 export default api;

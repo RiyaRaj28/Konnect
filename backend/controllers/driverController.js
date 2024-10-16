@@ -4,7 +4,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 
-
 // Register a new driver
 exports.registerDriver = async (req, res) => {
   const { name, vehicleType, isAvailable, email, password, location, status } = req.body;
@@ -33,7 +32,9 @@ exports.registerDriver = async (req, res) => {
       email,
       password: hashedPassword,
       location: driverLocation,
-      status: status || 'idle'
+      status: status || 'idle',
+      aggregateRating: 0,
+      totalRatings: 0
     });
 
     await newDriver.save();
@@ -76,6 +77,7 @@ exports.loginDriver = async (req, res) => {
 
 exports.acceptJob = async (req, res) => {
   const { bookingId } = req.body;
+  const trimmedBookingId = bookingId.trim(); // Trim any whitespace
 
   try {
     if (!req.driver) {
@@ -108,12 +110,14 @@ exports.acceptJob = async (req, res) => {
       { new: true, runValidators: true }
     );
 
+    console.log('Updated driver avl?:', updatedDriver.isAvailable);
+
     if (!updatedDriver) {
       return res.status(400).json({ message: 'Failed to update driver status' });
     }
 
     // Check if booking exists before updating
-    const existingBooking = await Booking.findById(bookingId);
+    const existingBooking = await Booking.findById(trimmedBookingId);
     if (!existingBooking) {
       // Revert driver status
       await Driver.findByIdAndUpdate(driverId, { status: 'idle', isAvailable: true });
@@ -126,10 +130,16 @@ exports.acceptJob = async (req, res) => {
       return res.status(400).json({ message: 'Booking is not in pending status' });
     }
 
-    // Update the booking
+    // Update the booking with start time
     const updatedBooking = await Booking.findOneAndUpdate(
-      { _id: bookingId, status: 'pending' },
-      { $set: { status: 'accepted', driverId: driverId } },
+      { _id: trimmedBookingId, status: 'pending' },
+      { 
+        $set: { 
+          status: 'accepted', 
+          driverId: driverId,
+          startTime: new Date() // Add start time
+        } 
+      },
       { new: true, runValidators: true }
     );
 
@@ -153,7 +163,6 @@ exports.acceptJob = async (req, res) => {
     res.status(500).json({ message: 'Error accepting job', error: error.message });
   }
 };
-
 
 exports.updateLocation = async (req, res) => {
   const { driverId, location } = req.body;
