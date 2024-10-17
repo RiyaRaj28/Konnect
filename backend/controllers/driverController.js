@@ -4,8 +4,56 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const { emitDriverLocation } = require('../services/socketService');
+const cacheService = require('../services/cacheService');
 
 // Register a new driver
+exports.getDriverById = async (req, res) => {
+  try {
+    const driverId = req.params.id;
+    const cacheKey = `driver:${driverId}`;
+
+    // Try to get driver from cache
+    let driver = await cacheService.get(cacheKey);
+    console.log("DRIVER FROM CACHE", driver)
+
+    if (!driver) {
+      // If not in cache, get from database
+      driver = await Driver.findById(driverId);
+      if (!driver) {
+        return res.status(404).json({ message: 'Driver not found' });
+      }
+      // Store in cache
+      await cacheService.set(cacheKey, driver);
+    }
+
+    res.json(driver);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching driver', error: error.message });
+  }
+};
+
+exports.updateDriver = async (req, res) => {
+  try {
+    const driverId = req.params.id;
+    const updateData = req.body;
+    const cacheKey = `driver:${driverId}`;
+
+    const updatedDriver = await Driver.findByIdAndUpdate(driverId, updateData, { new: true });
+    if (!updatedDriver) {
+      return res.status(404).json({ message: 'Driver not found' });
+    }
+
+    console.log("UPDATED DRIVER FROM CACHE", updatedDriver)
+
+    // Update cache
+    await cacheService.set(cacheKey, updatedDriver);
+
+    res.json(updatedDriver);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating driver', error: error.message });
+  }
+};
+
 exports.registerDriver = async (req, res) => {
   const { name, vehicleType, isAvailable, email, password, location, status } = req.body;
 
@@ -25,6 +73,8 @@ exports.registerDriver = async (req, res) => {
       coordinates: location && Array.isArray(location) ? location : [0, 0] // Default to [0, 0] if not provided
     };
 
+    console.log("driverLocation", driverLocation) 
+
     // Create a new driver
     const newDriver = new Driver({
       name,
@@ -32,7 +82,7 @@ exports.registerDriver = async (req, res) => {
       isAvailable: isAvailable !== undefined ? isAvailable : true,
       email,
       password: hashedPassword,
-      location: driverLocation,
+      location: location || { type: 'Point', coordinates: [0, 0] }, // Use provided location or default
       status: status || 'idle',
       aggregateRating: 0,
       totalRatings: 0
@@ -315,10 +365,56 @@ exports.updateLiveLocation = async (req, res) => {
 
     // Emit the updated location to connected clients
     emitDriverLocation(bookingId, { latitude, longitude });
+    console.log("LOCATION UPDATED")
 
     res.status(200).json({ message: 'Location updated successfully' });
   } catch (error) {
     console.error('Error updating live location:', error);
     res.status(500).json({ message: 'Error updating live location', error: error.message });
+  }
+};
+
+exports.getDriverById = async (req, res) => {
+  try {
+    const driverId = req.params.id;
+    const cacheKey = `driver:${driverId}`;
+
+    // Try to get driver from cache
+    let driver = await cacheService.get(cacheKey);
+    console.log("DRIVER FROM CACHE", driver)
+
+    if (!driver) {
+      // If not in cache, get from database
+      driver = await Driver.findById(driverId);
+      if (!driver) {
+        return res.status(404).json({ message: 'Driver not found' });
+      }
+      // Store in cache
+      await cacheService.set(cacheKey, driver);
+    }
+
+    res.json(driver);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching driver', error: error.message });
+  }
+};
+
+exports.updateDriver = async (req, res) => {
+  try {
+    const driverId = req.params.id;
+    const updateData = req.body;
+    const cacheKey = `driver:${driverId}`;
+
+    const updatedDriver = await Driver.findByIdAndUpdate(driverId, updateData, { new: true });
+    if (!updatedDriver) {
+      return res.status(404).json({ message: 'Driver not found' });
+    }
+
+    // Update cache
+    await cacheService.set(cacheKey, updatedDriver);
+
+    res.json(updatedDriver);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating driver', error: error.message });
   }
 };

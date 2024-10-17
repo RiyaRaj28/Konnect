@@ -40,6 +40,7 @@ const UpdateMapView = ({ driverLocation, pickup, dropoff }) => {
   const map = useMap();
   useEffect(() => {
     if (driverLocation) {
+      console.log("DRIVER LOCATION", driverLocation)
       map.fitBounds([
         [pickup[0], pickup[1]],
         [driverLocation.latitude, driverLocation.longitude],
@@ -52,12 +53,14 @@ const UpdateMapView = ({ driverLocation, pickup, dropoff }) => {
 
 const LiveTracking = ({ bookingId, pickup, dropoff }) => {
     console.log("hellooo")
+    console.log("BOOKING ID", bookingId)
   console.log('Booking ID from live tracking:', bookingId);
   const [driverLocation, setDriverLocation] = useState(null);
   const [waypoints, setWaypoints] = useState([]);
 
   useEffect(() => {
     const socket = io('http://localhost:5000');
+    console.log("SOCKET", socket)
 
     socket.emit('joinBooking', bookingId);
     console.log('Booking ID from live tracking from live tracking component:', bookingId);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Container, Box, List, ListItem, ListItemText, Button, Rating, Link } from '@mui/material';
-import { getUserBookings, rateBooking } from '../services/api';
+import { Typography, Box, List, ListItem, ListItemText, Rating, Link } from '@mui/material';
+import { getUserBookings, rateBooking, getDriverById } from '../services/api';
 import { Link as RouterLink } from 'react-router-dom';
 
 export default function ViewBookings() {
@@ -13,7 +13,28 @@ export default function ViewBookings() {
   const fetchBookings = async () => {
     try {
       const response = await getUserBookings();
-      setBookings(response.data.bookings);
+      // console.log("RESPONSE", response.data.bookings)
+      // console.log("DRIVER ID", response.data.bookings[0].driverId._id)
+      const bookingsWithDrivers = await Promise.all(
+        response.data.bookings.map(async (booking) => {
+          if (booking.driverId) {
+            // console.log("DRIVER IDDD", booking.driverId._id)
+            // console.log("DRIVER NAME", booking.driverId.name)
+
+            try {
+              const driverData = await getDriverById(booking.driverId._id);
+              // console.log("DRIVER DATA", driverData)
+              // console.log("DRIVER DATA", driverData.data._id)
+              return { ...booking, driver: driverData };
+            } catch (error) {
+              console.error(`Error fetching driver ${booking.driverId._id}:`, error);
+              return booking;
+            }
+          }
+          return booking;
+        })
+      );
+      setBookings(bookingsWithDrivers);
     } catch (error) {
       console.error('Error fetching bookings:', error);
     }
@@ -29,13 +50,7 @@ export default function ViewBookings() {
   };
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-      }}
-    >
+    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
       <Typography component="h1" variant="h5">
         Your Bookings
       </Typography>

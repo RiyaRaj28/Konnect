@@ -38,6 +38,8 @@ export const getTotalEarning = () => api.get('/drivers/total-earning');
 export const getDriverStatus = () => api.get('/drivers/status');
 export const getAcceptedBookings = () => api.get('/drivers/accepted-bookings');
 
+export const getDriverById = (driverId) => api.get(`/drivers/${driverId}`);
+
 // Admin Functions
 export const getTotalDrivers = () => api.get('/admin/drivers/total');
 export const getIdleDrivers = () => api.get('/admin/drivers/idle');
