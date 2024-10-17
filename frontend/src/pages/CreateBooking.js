@@ -28,8 +28,8 @@ function LocationMarker({ position, setPosition }) {
 }
 
 export default function CreateBooking({ onBookingCreated }) {
-  const [pickupLocation, setPickupLocation] = useState({ lat: 12.3456, lng: 78.9012 });
-  const [dropoffLocation, setDropoffLocation] = useState({ lat: 12.4567, lng: 78.9123 });
+  const [pickupLocation, setPickupLocation] = useState({ lat: 29.9456, lng: 76.8131 });
+  const [dropoffLocation, setDropoffLocation] = useState({ lat: 29.9456, lng: 76.8131 });
   const [vehicleType, setVehicleType] = useState('');
   const navigate = useNavigate();
 

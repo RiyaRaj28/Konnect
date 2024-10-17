@@ -51,4 +51,10 @@ export const getTotalUsers = () => api.get('/admin/users/total');
 // User Dashboard
 export const getUserDashboard = () => api.get('/user/dashboard');
 
+// Add this new function for updating live location
+export const updateLiveLocation = (latitude, longitude, bookingId) => 
+  api.post('/drivers/update-live-location', { latitude, longitude, bookingId });
+
+export const getBookingDetails = (bookingId) => api.get(`/bookings/${bookingId}`);
+
 export default api;

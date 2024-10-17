@@ -3,6 +3,7 @@ const Booking = require('../models/Booking');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const { emitDriverLocation } = require('../services/socketService');
 
 // Register a new driver
 exports.registerDriver = async (req, res) => {
@@ -299,5 +300,25 @@ exports.getAcceptedBookings = async (req, res) => {
   }
 };
 
-// Add this line to the routes file (e.g., routes/driverRoutes.js):
-// router.get('/accepted-bookings', authMiddleware, driverController.getAcceptedBookings);
+exports.updateLiveLocation = async (req, res) => {
+  try {
+    const { latitude, longitude, bookingId } = req.body;
+    const driverId = req.driver._id;
+
+    // Update driver's location in the database
+    await Driver.findByIdAndUpdate(driverId, {
+      location: {
+        type: 'Point',
+        coordinates: [longitude, latitude]
+      }
+    });
+
+    // Emit the updated location to connected clients
+    emitDriverLocation(bookingId, { latitude, longitude });
+
+    res.status(200).json({ message: 'Location updated successfully' });
+  } catch (error) {
+    console.error('Error updating live location:', error);
+    res.status(500).json({ message: 'Error updating live location', error: error.message });
+  }
+};

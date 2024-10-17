@@ -2,10 +2,12 @@ console.log('Server starting...');
 const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
+const http = require('http');
 const connectDB = require('./utils/database');
 const { UI } = require('bullmq');
 const setupBullDashboard = require('./controllers/bullDashboard');
 require('./cron/updateDriverRatings');
+const { initializeSocket } = require('./services/socketService');
 
 // Routes
 const bookingRoutes = require('./routes/bookingRoutes');
@@ -17,6 +19,10 @@ dotenv.config();
 
 // Initialize Express App
 const app = express();
+const server = http.createServer(app);
+
+// Initialize Socket.IO
+initializeSocket(server);
 
 // Middleware
 app.use(express.json());
@@ -43,11 +49,6 @@ app.get('/test-error', (req, res, next) => {
   throw new Error('This is a test error');
 });
 
-// app.get('/test-error2', (req, res, next) => {
-//   console.log('Test error route hit');
-//   throw new Error('This is a test error');
-// });
-
 // API Routes
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/drivers', driverRoutes);
@@ -70,7 +71,7 @@ app.use('*', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 

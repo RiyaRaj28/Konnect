@@ -229,3 +229,52 @@ exports.rateBooking = async (req, res) => {
     res.status(500).json({ message: 'Error rating booking', error: error.message });
   }
 };
+
+exports.getBookingDetails = async (req, res) => {
+  const { bookingId } = req.params;
+
+  try {
+    const booking = await Booking.findById(bookingId)
+      .populate('userId', 'name email')  // Populate user details
+      .populate('driverId', 'name vehicleType')  // Populate driver details
+      .exec();
+
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    // Check if the user requesting the details is either the booking user or the assigned driver
+    // if (booking.driverId && booking.driverId._id.toString() !== req.user._id.toString()) {
+    //   return res.status(403).json({ message: 'Not authorized to view this booking' });
+    // }
+
+    res.status(200).json({
+      booking: {
+        _id: booking._id,
+        status: booking.status,
+        pickupLocation: booking.pickupLocation,
+        dropoffLocation: booking.dropoffLocation,
+        vehicleType: booking.vehicleType,
+        estimatedPrice: booking.estimatedPrice,
+        distance: booking.distance,
+        duration: booking.duration,
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        rating: booking.rating,
+        user: {
+          _id: booking.userId._id,
+          name: booking.userId.name,
+          email: booking.userId.email
+        },
+        driver: booking.driverId ? {
+          _id: booking.driverId._id,
+          name: booking.driverId.name,
+          vehicleType: booking.driverId.vehicleType
+        } : null
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching booking details:', error);
+    res.status(500).json({ message: 'Error fetching booking details', error: error.message });
+  }
+};

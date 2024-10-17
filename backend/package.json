@@ -23,8 +23,12 @@
     "google-distance-matrix": "^1.1.1",
     "ioredis": "^5.4.1",
     "jsonwebtoken": "^9.0.2",
+    "leaflet": "^1.9.4",
     "mongodb": "^6.9.0",
     "mongoose": "^8.7.1",
-    "node-cron": "^3.0.3"
+    "node-cron": "^3.0.3",
+    "react-leaflet": "^4.2.1",
+    "socket.io": "^4.8.0",
+    "socket.io-client": "^4.8.0"
   }
 }

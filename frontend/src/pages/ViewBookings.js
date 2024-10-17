@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Typography, Container, Box, List, ListItem, ListItemText, Button, Rating } from '@mui/material';
+import { Typography, Container, Box, List, ListItem, ListItemText, Button, Rating, Link } from '@mui/material';
 import { getUserBookings, rateBooking } from '../services/api';
+import { Link as RouterLink } from 'react-router-dom';
 
 export default function ViewBookings() {
   const [bookings, setBookings] = useState([]);
@@ -73,6 +74,11 @@ export default function ViewBookings() {
                 <Typography component="legend">Your rating</Typography>
                 <Rating name={`rating-${booking._id}`} value={booking.rating} readOnly />
               </Box>
+            )}
+            {booking.status === 'accepted' && (
+              <Link to={`/booking/${booking._id}`} component={RouterLink}>
+                View Booking Details
+              </Link>
             )}
           </ListItem>
         ))}

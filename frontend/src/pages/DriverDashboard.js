@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Typography, Container, Box, List, ListItem, ListItemText, Button, CircularProgress, Tabs, Tab, Chip } from '@mui/material';
-import { getPendingBookings, getTotalEarning, acceptJob, updateBookingStatus, getDriverStatus, getAcceptedBookings } from '../services/api';
+import { getPendingBookings, getTotalEarning, acceptJob, updateBookingStatus, getDriverStatus, getAcceptedBookings, updateLiveLocation, getBookingDetails } from '../services/api';
 
 export default function DriverDashboard() {
   const [bookings, setBookings] = useState({ pending: [], accepted: [], completed: [] });
@@ -24,14 +24,14 @@ export default function DriverDashboard() {
         getAcceptedBookings()
       ]);
 
-      console.log('Pending Response:', pendingResponse);
-      console.log('Earnings Response:', earningsResponse);
-      console.log('Status Response of driver:', statusResponse);
+      // console.log('Pending Response:', pendingResponse);
+      // console.log('Earnings Response:', earningsResponse);
+      // console.log('Status Response of driver:', statusResponse);
 
 
       if (pendingResponse && earningsResponse  && statusResponse) {
         // All pending bookings are considered 'pending' in this response
-      console.log('Pending Response2:', pendingResponse.data);
+      // console.log('Pending Response2:', pendingResponse.data);
         setBookings({
           pending: pendingResponse.data,
           // accepted: pendingResponse.data.filter(booking => booking.status === 'accepted'),
@@ -41,13 +41,13 @@ export default function DriverDashboard() {
         setTotalEarnings(earningsResponse.data.totalEarnings);
 
         setAcceptedBookings(acceptedBookingsResponse.data);
-      console.log('Earnings Response2:', earningsResponse.data.data);
-      console.log('Earnings Response2:', earningsResponse.data.totalEarnings);
+      // console.log('Earnings Response2:', earningsResponse.data.data);
+      // console.log('Earnings Response2:', earningsResponse.data.totalEarnings);
 
       
 
         setDriverStatus(statusResponse.data.status);
-      console.log('Status Response2222:', statusResponse.data.status);
+      // console.log('Status Response2222:', statusResponse.data.status);
 
 
       } else {
@@ -64,12 +64,43 @@ export default function DriverDashboard() {
   const handleAcceptJob = async (bookingId) => {
     try {
       await acceptJob(bookingId);
-      console.log('Booking ID from accept job:', bookingId);
+      console.log("AAAAAAA", bookingId);
+      console.log('Booking ID from handle accept job I have accepted:', bookingId);
+      startLocationTracking(bookingId);
       await fetchData();
     } catch (error) {
       console.error('Error accepting job:', error);
       setError('Failed to accept job');
     }
+  };
+
+  const startLocationTracking = (bookingId) => {
+    if ('geolocation' in navigator) {
+      const watchId = navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude, accuracy } = position.coords;
+          console.log(`New position - Lat: ${latitude}, Lon: ${longitude}, Accuracy: ${accuracy} meters`);
+          updateLiveLocation(latitude, longitude, bookingId);
+        },
+        (error) => console.error('Error getting location:', error),
+        { 
+          enableHighAccuracy: true, 
+          maximumAge: 30000,     // Don't use cached positions
+          timeout: 27000      // Wait up to 5 seconds for a position
+        }
+      );
+      console.log('Watch ID:', watchId);
+    } else {
+      console.error('Geolocation is not supported by this browser.');
+    }
+  };
+
+  const fallbackLocationMethod = (bookingId) => {
+    // This could be an IP-based geolocation service or any other method
+    // For demonstration, we'll use a fixed position
+    const fallbackLatitude = 0;
+    const fallbackLongitude = 0;
+    updateLiveLocation(fallbackLatitude, fallbackLongitude, bookingId);
   };
 
   console.log('Accepted Bookings:', acceptedBookings);
@@ -181,7 +212,7 @@ export default function DriverDashboard() {
                       onClick={() => handleAcceptJob(booking.id)}
                       disabled={driverStatus !== 'idle'}
                     >
-                      Accept Jobs
+                      Accept Jobsss
                     </Button>
                   </ListItem>
                 ))}

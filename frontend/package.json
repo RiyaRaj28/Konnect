@@ -11,11 +11,14 @@
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.7.7",
     "leaflet": "^1.9.4",
+    "leaflet-routing-machine": "^3.2.12",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-leaflet": "^4.2.1",
+    "react-leaflet-routing-machine": "^0.0.5",
     "react-router-dom": "^6.27.0",
     "react-scripts": "5.0.1",
+    "socket.io-client": "^4.8.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

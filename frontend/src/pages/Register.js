@@ -6,7 +6,7 @@ import { register, registerDriver } from '../services/api';
 import 'leaflet/dist/leaflet.css';
 
 function LocationMarker({ position, setPosition }) {
-  const defaultPosition = [12.3456, 78.9012];
+  const defaultPosition = [29.9456, 76.8131];
 
   useMapEvents({
     click(e) {
@@ -136,7 +136,7 @@ export default function Register() {
                 onChange={handleChange}
               />
               <Typography>Select Your Location</Typography>
-              <MapContainer center={[12.3456, 78.9012]} zoom={13} style={{ height: '300px', width: '100%' }}>
+              <MapContainer center={[29.9456, 76.8131]} zoom={13} style={{ height: '300px', width: '100%' }}>
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                 <LocationMarker position={formData.location} setPosition={(pos) => setFormData({...formData, location: pos})} />
               </MapContainer>
