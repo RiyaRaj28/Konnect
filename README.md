@@ -20,7 +20,7 @@
 
 
 <!-- ABOUT THE PROJECT -->
-## About The Project And Our Motivation
+## About The Project 
 ![image](https://github.com/user-attachments/assets/0dbb4bbc-cd82-484f-a563-0a2f130ff784)
 ![image](https://github.com/user-attachments/assets/24605a7b-8349-42d9-94ed-264493e179b2)
 ![image](https://github.com/user-attachments/assets/d8f7f7a4-dd5b-4d8f-b11d-3831c0f50d11)
