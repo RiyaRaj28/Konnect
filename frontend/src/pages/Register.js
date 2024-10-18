@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import { register, registerDriver } from '../services/api';
 import 'leaflet/dist/leaflet.css';
 
+// lat: 29.9456, lng: 76.8131
 function LocationMarker({ position, setPosition }) {
   const defaultPosition = [29.9456, 76.8131];
 

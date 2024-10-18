@@ -2,6 +2,7 @@ const { Queue, Worker } = require('bullmq');
 const Redis = require('ioredis');
 const Driver = require('../models/Driver');
 const Booking = require('../models/Booking');
+const { assignDriver } = require('./bookingService');
 
 async function logAllDrivers() {
     try {
@@ -37,33 +38,12 @@ const worker = new Worker('driver-assignments', async (job) => {
       throw new Error('Invalid pickup location format');
     }
 
-    console.log("pickkk", pickupLocation)
-    const [longitude, latitude] = pickupLocation;
+    const assignedDriver = await assignDriver(pickupLocation, vehicleType);
 
-    const drivers = await Driver.find({
-      isAvailable: true,
-      vehicleType: vehicleType,
-      location: {
-        $near: {
-          $geometry: {
-            type: "Point",
-            coordinates: [longitude, latitude]
-          },
-          $maxDistance: 50000 // 50 km radius
-        }
-      }
-    }).limit(1);
-
-  logAllDrivers();
-
-    console.log(`Found ${drivers.length} available drivers`);
-
-    if (drivers.length === 0) {
-      await Booking.findByIdAndUpdate(bookingId, { status: 'no_driver_available', runValidators: false });
+    if (!assignedDriver) {
+      await Booking.findByIdAndUpdate(bookingId, { status: 'no_driver_available' }, { runValidators: false });
       throw new Error('No available drivers found');
     }
-
-    const assignedDriver = drivers[0];
 
     const updatedBooking = await Booking.findByIdAndUpdate(
       bookingId,
@@ -77,9 +57,6 @@ const worker = new Worker('driver-assignments', async (job) => {
     if (!updatedBooking) {
       throw new Error(`Booking ${bookingId} not found`);
     }
-
-    // assignedDriver.isAvailable = false;
-    await assignedDriver.save({validateBeforeSave: false});
 
     console.log(`Driver ${assignedDriver._id} assigned to booking ${bookingId}`);
 

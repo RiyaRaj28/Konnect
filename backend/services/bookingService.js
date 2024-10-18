@@ -2,6 +2,7 @@ const Booking = require('../models/Booking');
 const Driver = require('../models/Driver');
 const { getDistance, getSurgeMultiplier } = require('../utils/geolocation');
 const mongoose = require('mongoose');
+const { queueDriverAssignment } = require('./PostBookingActionsQueue');
 
 
 
@@ -31,17 +32,8 @@ async function bookVehicle(userId, pickupLocation, dropoffLocation, vehicleType)
         
         const savedBooking = await booking.save();
         
-        // Step 5: Assign a driver to the booking
-        const assignedDriver = await assignDriver(pickupLocation);
-        
-        if (!assignedDriver) {
-            throw new Error('No drivers available at the moment');
-        }
-        
-        // Update booking with driver information
-        savedBooking.driverId = assignedDriver._id;
-        savedBooking.status = 'driver_assigned';
-        await savedBooking.save();
+        // Queue the driver assignment job
+        await queueDriverAssignment(savedBooking._id, pickupLocation, vehicleType);
         
         return savedBooking;
     } catch (error) {
@@ -79,34 +71,37 @@ function calculateBookingCost(distanceInKilometers, durationInMinutes, vehicleTy
 // Assign a driver to the booking based on proximity to the pickup location
 async function assignDriver(pickupLocation, vehicleType) {
     try {
-        // Find drivers who are nearby, available, and have the requested vehicle type
-        const driversall = await Driver.find();
-        console.log("all drivers", driversall)
+        if (!Array.isArray(pickupLocation) || pickupLocation.length !== 2) {
+            throw new Error('Invalid pickup location format');
+        }
+
+        const [longitude, latitude] = pickupLocation;
+
         const drivers = await Driver.find({
-            isAvailable: true, // Ensure driver availability is checked properly
-            vehicleType: vehicleType, // Ensure the vehicle type matches
+            isAvailable: true,
+            vehicleType: vehicleType,
             location: {
                 $near: {
                     $geometry: {
                         type: "Point",
-                        coordinates: [pickupLocation[0], pickupLocation[1]] // Longitude, Latitude
+                        coordinates: [longitude, latitude]
                     },
-                    $maxDistance: 50000 // 20 km radius
+                    $maxDistance: 50000 // 50 km radius
                 }
             }
-        });
-        console.log("Drivers found:", drivers);
+        }).limit(1);
+
+        console.log(`Found ${drivers.length} available drivers`);
 
         if (drivers.length === 0) {
             return null; // No drivers available
         }
 
-        // Assign the closest driver
         const assignedDriver = drivers[0];
-        assignedDriver.isAvailable = false; // Set the driver as unavailable
-        await assignedDriver.save();
+        assignedDriver.isAvailable = false;
+        await assignedDriver.save({ validateBeforeSave: false });
 
-        return assignedDriver; // Return the assigned driver
+        return assignedDriver;
     } catch (error) {
         console.error("Error while assigning driver:", error);
         throw new Error("Failed to assign driver");
