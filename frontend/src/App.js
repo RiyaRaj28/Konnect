@@ -24,7 +24,7 @@ function App() {
         <Route path="/update-booking-status" element={<UpdateBookingStatus />} />
         <Route path="/live-tracking/:bookingId" element={<LiveTracking />} /> {/* New route for live tracking */}
         <Route path="/booking/:bookingId" element={<BookingDetails />} />
-        <Route path="/" element={<Navigate to="/user/dashboard" replace />} />
+        <Route path="/" element={<Navigate to="/register" replace />} />
       </Routes>
     </Router>
   );

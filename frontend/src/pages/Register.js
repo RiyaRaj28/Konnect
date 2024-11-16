@@ -4,20 +4,27 @@ import { TextField, Button, Typography, Container, Box, Radio, RadioGroup, FormC
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import { register, registerDriver } from '../services/api';
 import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
-// lat: 29.9456, lng: 76.8131
+let DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41]
+});
+
+L.Marker.prototype.options.icon = DefaultIcon;
+
 function LocationMarker({ position, setPosition }) {
-  const defaultPosition = [29.9456, 76.8131];
-
   useMapEvents({
     click(e) {
       setPosition(e.latlng);
     },
   });
 
-  return (
-    <Marker position={position || defaultPosition} />
-  );
+  return position && <Marker position={position} icon={DefaultIcon} />;
 }
 
 export default function Register() {
@@ -27,10 +34,10 @@ export default function Register() {
     password: '',
     userType: 'user',
     vehicleType: '',
-    location: null,
     isAvailable: true,
     status: 'idle'
   });
+  const [location, setLocation] = useState({ lat: 29.9456, lng: 76.8131 });
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -48,15 +55,18 @@ export default function Register() {
             email: formData.email, 
             password: formData.password,
             vehicleType: formData.vehicleType,
-            location: formData.location ? [formData.location.lng, formData.location.lat] : undefined,
+            location: [location.lng, location.lat],
             isAvailable: formData.isAvailable,
             status: formData.status
           };
       
+      // Log the data being sent to the backend
+      console.log('Sending registration data to backend:', registrationData);
+      
       const response = await registerFunction(registrationData);
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('userType', formData.userType);
-      navigate(formData.userType === 'user' ? '/create-booking' : '/driver-dashboard');
+      navigate(formData.userType === 'user' ? '/user/dashboard' : '/driver-dashboard');
     } catch (error) {
       console.error('Registration failed:', error);
     }
@@ -85,7 +95,7 @@ export default function Register() {
               onChange={handleChange}
               row
             >
-              <FormControlLabel value="user" control={<Radio />} label="Userr" />
+              <FormControlLabel value="user" control={<Radio />} label="User" />
               <FormControlLabel value="driver" control={<Radio />} label="Driver" />
             </RadioGroup>
           </FormControl>
@@ -137,10 +147,18 @@ export default function Register() {
                 onChange={handleChange}
               />
               <Typography>Select Your Location</Typography>
-              <MapContainer center={[29.9456, 76.8131]} zoom={13} style={{ height: '300px', width: '100%' }}>
+              <MapContainer center={[location.lat, location.lng]} zoom={13} style={{ height: '300px', width: '100%' }}>
                 <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                <LocationMarker position={formData.location} setPosition={(pos) => setFormData({...formData, location: pos})} />
+                <LocationMarker 
+                  position={location} 
+                  setPosition={setLocation} 
+                />
               </MapContainer>
+              {location && (
+                <Typography>
+                  Selected Location: {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
+                </Typography>
+              )}
             </>
           )}
           <Button

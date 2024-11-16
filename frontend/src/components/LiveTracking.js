@@ -16,12 +16,28 @@ L.Icon.Default.mergeOptions({
 });
 
 const RoutingMachine = createControlComponent(({ pickup, dropoff, waypoints }) => {
+  // Format waypoints as a string: "lon1,lat1;lon2,lat2;lon3,lat3"
+  const waypointsString = [
+    `${pickup[0]},${pickup[1]}`,
+    ...waypoints.map(wp => `${wp[0]},${wp[1]}`),
+    `${dropoff[0]},${dropoff[1]}`
+  ].join(';');
+
   const instance = L.Routing.control({
     waypoints: [
-      L.latLng(pickup[0], pickup[1]),
-      ...waypoints.map(wp => L.latLng(wp[0], wp[1])),
-      L.latLng(dropoff[0], dropoff[1])
+      L.latLng(pickup[1], pickup[0]),
+      ...waypoints.map(wp => L.latLng(wp[1], wp[0])),
+      L.latLng(dropoff[1], dropoff[0])
     ],
+    router: new L.Routing.OSRMv1({
+      serviceUrl: `https://router.project-osrm.org/route/v1/`,
+      profile: 'driving',
+      // Use the formatted waypoints string
+      routingOptions: {
+        alternatives: true,
+        steps: true
+      }
+    }),
     lineOptions: {
       styles: [{ color: "#6FA1EC", weight: 4 }]
     },
@@ -33,6 +49,13 @@ const RoutingMachine = createControlComponent(({ pickup, dropoff, waypoints }) =
     showAlternatives: false
   });
 
+  // Log the formatted waypoints string for debugging
+  console.log("Formatted waypoints:", waypointsString);
+
+  instance.on('routingerror', function(e) {
+    console.error('Routing error:', e.error);
+  });
+
   return instance;
 });
 
@@ -42,14 +65,15 @@ const UpdateMapView = ({ driverLocation, pickup, dropoff }) => {
     if (driverLocation) {
       console.log("DRIVER LOCATION", driverLocation)
       map.fitBounds([
-        [pickup[0], pickup[1]],
+        [pickup[1], pickup[0]],
         [driverLocation.latitude, driverLocation.longitude],
-        [dropoff[0], dropoff[1]]
+        [dropoff[1], dropoff[0]]
       ]);
     }
   }, [driverLocation, map, pickup, dropoff]);
   return null;
 };
+
 
 const LiveTracking = ({ bookingId, pickup, dropoff }) => {
     console.log("hellooo")
@@ -69,7 +93,7 @@ const LiveTracking = ({ bookingId, pickup, dropoff }) => {
     socket.on('driverLocationUpdate', (location) => {
       setDriverLocation(location);
       console.log('Driver Location from socket:', location);
-      setWaypoints(prevWaypoints => [...prevWaypoints, [location.latitude, location.longitude]]);
+      setWaypoints(prevWaypoints => [...prevWaypoints, [location.longitude, location.latitude]]);
     });
 
     return () => {
@@ -78,7 +102,9 @@ const LiveTracking = ({ bookingId, pickup, dropoff }) => {
   }, [bookingId]);
 
 
-  console.log('Driver Locationnnnnnnnnnnnnnnn:', driverLocation);
+  console.log('Pickup from live tracking:', pickup);
+  console.log('Dropoff from live tracking:', dropoff);
+  console.log('Driver Location from live tracking:', driverLocation);
 
   if (!driverLocation) {
     return <div>Waiting for driver location...</div>;
@@ -86,7 +112,7 @@ const LiveTracking = ({ bookingId, pickup, dropoff }) => {
 
   return (
     <MapContainer 
-      center={[pickup[0], pickup[1]]} 
+      center={[pickup[1], pickup[0]]} 
       zoom={13} 
       style={{ height: '400px', width: '100%' }}
     >
@@ -94,8 +120,8 @@ const LiveTracking = ({ bookingId, pickup, dropoff }) => {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       />
-      <Marker position={[pickup[0], pickup[1]]} />
-      <Marker position={[dropoff[0], dropoff[1]]} />
+      <Marker position={[pickup[1], pickup[0]]} />
+      <Marker position={[dropoff[1], dropoff[0]]} />
       {driverLocation && (
         <Marker position={[driverLocation.latitude, driverLocation.longitude]} />
       )}

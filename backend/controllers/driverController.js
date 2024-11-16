@@ -57,6 +57,15 @@ exports.updateDriver = async (req, res) => {
 exports.registerDriver = async (req, res) => {
   const { name, vehicleType, isAvailable, email, password, location, status } = req.body;
 
+  console.log('Received driver registration data:', {
+    name,
+    vehicleType,
+    isAvailable,
+    email,
+    location,
+    status
+  });
+
   try {
     // Check if driver already exists
     const existingDriver = await Driver.findOne({ email });
@@ -70,7 +79,7 @@ exports.registerDriver = async (req, res) => {
     // Prepare the location object
     const driverLocation = {
       type: 'Point',
-      coordinates: location && Array.isArray(location) ? location : [0, 0] // Default to [0, 0] if not provided
+      coordinates: location && Array.isArray(location) ? location : [76.8131, 29.9456] // Default to [76.8131, 29.9456] if not provided
     };
 
     console.log("driverLocation", driverLocation) 
@@ -82,13 +91,14 @@ exports.registerDriver = async (req, res) => {
       isAvailable: isAvailable !== undefined ? isAvailable : true,
       email,
       password: hashedPassword,
-      location: location || { type: 'Point', coordinates: [0, 0] }, // Use provided location or default
+      location: driverLocation, // Use the prepared driverLocation
       status: status || 'idle',
       aggregateRating: 0,
       totalRatings: 0
     });
 
     await newDriver.save();
+    console.log("New driver saved:", newDriver);
     
     // Generate JWT token
     const token = jwt.sign({id: newDriver._id, type: 'driver'}, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -357,14 +367,11 @@ exports.updateLiveLocation = async (req, res) => {
 
     // Update driver's location in the database
     await Driver.findByIdAndUpdate(driverId, {
-      location: {
-        type: 'Point',
-        coordinates: [longitude, latitude]
-      }
+      location: [longitude, latitude] // Store as [longitude, latitude] to match GeoJSON convention
     });
 
     // Emit the updated location to connected clients
-    emitDriverLocation(bookingId, { latitude, longitude });
+    emitDriverLocation(bookingId, { longitude, latitude });
     console.log("LOCATION UPDATED")
 
     res.status(200).json({ message: 'Location updated successfully' });
@@ -418,3 +425,31 @@ exports.updateDriver = async (req, res) => {
     res.status(500).json({ message: 'Error updating driver', error: error.message });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

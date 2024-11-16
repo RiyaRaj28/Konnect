@@ -68,7 +68,7 @@ function calculateBookingCost(distanceInKilometers, durationInMinutes, vehicleTy
     return cost.toFixed(2); // Return formatted price
 }
 
-// Assign a driver to the booking based on proximity to the pickup location
+//  a driver to the booking based on proximity to the pickup location
 async function assignDriver(pickupLocation, vehicleType) {
     try {
         if (!Array.isArray(pickupLocation) || pickupLocation.length !== 2) {
@@ -98,9 +98,6 @@ async function assignDriver(pickupLocation, vehicleType) {
         }
 
         const assignedDriver = drivers[0];
-        assignedDriver.isAvailable = false;
-        await assignedDriver.save({ validateBeforeSave: false });
-
         return assignedDriver;
     } catch (error) {
         console.error("Error while assigning driver:", error);

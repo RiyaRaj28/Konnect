@@ -8,7 +8,7 @@ export default function DriverDashboard() {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState(0);
   const [totalEarnings, setTotalEarnings] = useState(0);
-  const [driverStatus, setDriverStatus] = useState('idle');
+  const [driverStatus, setDriverStatus] = useState('idle'); 
   const [acceptedBookings, setAcceptedBookings] = useState([]);
   useEffect(() => {
     fetchData();
@@ -212,7 +212,7 @@ export default function DriverDashboard() {
                       onClick={() => handleAcceptJob(booking.id)}
                       disabled={driverStatus !== 'idle'}
                     >
-                      Accept Jobsss
+                      Accept Job
                     </Button>
                   </ListItem>
                 ))}
