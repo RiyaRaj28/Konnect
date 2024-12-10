@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+'use client'
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { TextField, Button, Typography, Container, Box, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel } from '@mui/material';
 import { login, loginDriver } from '../services/api';
@@ -10,6 +12,26 @@ export default function Login() {
     userType: 'user'
   });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Apply background image to the entire page
+    document.body.style.backgroundImage = 'url(/background_login.svg)';
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
+    document.body.style.backgroundRepeat = 'no-repeat';
+    document.body.style.height = '100vh';
+    document.body.style.margin = '0';
+
+    // Cleanup function to remove styles when component unmounts
+    return () => {
+      document.body.style.backgroundImage = '';
+      document.body.style.backgroundSize = '';
+      document.body.style.backgroundPosition = '';
+      document.body.style.backgroundRepeat = '';
+      document.body.style.height = '';
+      document.body.style.margin = '';
+    };
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -39,6 +61,9 @@ export default function Login() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          padding: 2,
+          borderRadius: 2,
         }}
       >
         <Typography component="h1" variant="h5">
@@ -98,3 +123,4 @@ export default function Login() {
     </Container>
   );
 }
+

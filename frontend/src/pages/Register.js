@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { TextField, Button, Typography, Container, Box, Radio, RadioGroup, FormControlLabel, FormControl, FormLabel } from '@mui/material';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
@@ -40,6 +40,28 @@ export default function Register() {
   const [location, setLocation] = useState({ lat: 29.9456, lng: 76.8131 });
   const navigate = useNavigate();
 
+  useEffect(() => {
+    // Apply background image to the entire page
+    document.body.style.backgroundImage = 'url(/bg_registration.svg)';
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
+    document.body.style.backgroundRepeat = 'no-repeat';
+    document.body.style.backgroundAttachment = 'fixed';
+    document.body.style.minHeight = '100vh';
+    document.body.style.margin = '0';
+
+    // Cleanup function to remove styles when component unmounts
+    return () => {
+      document.body.style.backgroundImage = '';
+      document.body.style.backgroundSize = '';
+      document.body.style.backgroundPosition = '';
+      document.body.style.backgroundRepeat = '';
+      document.body.style.backgroundAttachment = '';
+      document.body.style.minHeight = '';
+      document.body.style.margin = '';
+    };
+  }, []);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -80,6 +102,9 @@ export default function Register() {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          padding: 3,
+          borderRadius: 2,
         }}
       >
         <Typography component="h1" variant="h5">
@@ -177,3 +202,4 @@ export default function Register() {
     </Container>
   );
 }
+
