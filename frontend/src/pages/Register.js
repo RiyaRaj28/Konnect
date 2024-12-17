@@ -90,7 +90,14 @@ export default function Register() {
       localStorage.setItem('userType', formData.userType);
       navigate(formData.userType === 'user' ? '/user/dashboard' : '/driver-dashboard');
     } catch (error) {
-      console.error('Registration failed:', error);
+      // Enhanced error logging
+      console.error('Registration failed:', error.message || error);
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+        console.error('Error response status:', error.response.status);
+      } else {
+        console.error('Error details:', error);
+      }
     }
   };
 

@@ -71,9 +71,14 @@ app.use('*', (req, res) => {
 });
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+try {
+  server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+} catch (error) {
+  console.error('Error starting the server:', error);
+  process.exit(1);
+}
 
 // Catch unhandled rejections
 process.on('unhandledRejection', (reason, promise) => {
