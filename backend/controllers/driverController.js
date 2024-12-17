@@ -14,7 +14,7 @@ exports.getDriverById = async (req, res) => {
 
     // Try to get driver from cache
     let driver = await cacheService.get(cacheKey);
-    console.log("DRIVER FROM CACHE", driver)
+    // console.log("DRIVER FROM CACHE", driver)
 
     if (!driver) {
       // If not in cache, get from database
@@ -77,9 +77,14 @@ exports.registerDriver = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Prepare the location object
-    const driverLocation = {
+    // const driverLocation = {
+    //   type: 'Point',
+    //   coordinates: location && Array.isArray(location) ? location : [76.8131, 29.9456] // Default to [76.8131, 29.9456] if not provided
+    // };
+
+    const driverLocation = location && location.type === 'Point' ? location : {
       type: 'Point',
-      coordinates: location && Array.isArray(location) ? location : [76.8131, 29.9456] // Default to [76.8131, 29.9456] if not provided
+      coordinates: [76.8131, 29.9456] // Default coordinates
     };
 
     console.log("driverLocation", driverLocation) 
@@ -388,7 +393,7 @@ exports.getDriverById = async (req, res) => {
 
     // Try to get driver from cache
     let driver = await cacheService.get(cacheKey);
-    console.log("DRIVER FROM CACHE", driver)
+    // console.log("DRIVER FROM CACHE", driver)
 
     if (!driver) {
       // If not in cache, get from database

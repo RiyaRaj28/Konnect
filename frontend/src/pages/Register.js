@@ -77,7 +77,11 @@ export default function Register() {
             email: formData.email, 
             password: formData.password,
             vehicleType: formData.vehicleType,
-            location: [location.lng, location.lat],
+            // location: [location.lng, location.lat],
+            location: {
+              type: 'Point',
+              coordinates: [location.lng, location.lat]
+            },
             isAvailable: formData.isAvailable,
             status: formData.status
           };

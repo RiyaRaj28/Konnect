@@ -13,7 +13,18 @@ const DriverSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  location: { type: [Number], index: '2dsphere' },
+  // location: { type: [Number], index: '2dsphere' },
+  location: {
+    type: {
+      type: String,
+      enum: ['Point'],
+      required: true
+    },
+    coordinates: {
+      type: [Number],
+      required: true
+    }
+  },
   createdAt: {
     type: Date,
     default: Date.now
