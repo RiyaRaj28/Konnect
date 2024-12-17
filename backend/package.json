@@ -29,6 +29,7 @@
     "mongodb": "^6.9.0",
     "mongoose": "^8.7.1",
     "node-cron": "^3.0.3",
+    "nodemon": "^3.1.9",
     "rate-limiter-flexible": "^5.0.3",
     "react-leaflet": "^4.2.1",
     "redis": "^4.7.0",
