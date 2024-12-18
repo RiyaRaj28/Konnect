@@ -5,7 +5,7 @@ let io;
 function initializeSocket(server) {
   io = socketIo(server, {
     cors: {
-      origin: "https://konnect-frontend-4j33.onrender.com", // Replace with your frontend URL
+      origin: "https://konnect-frontend-ivory.vercel.app/", // Replace with your frontend URL
       methods: ["GET", "POST"]
     }
   });
