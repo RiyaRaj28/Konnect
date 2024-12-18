@@ -43,6 +43,10 @@ app.use((req, res, next) => {
 console.log("Connecting to MongoDB:", process.env.MONGO_URI);
 connectDB();
 
+app.get('/', (req, res) => {
+  res.json({ message: 'Backend is live' });
+});
+
 // Test error route
 app.get('/test-error', (req, res, next) => {
   console.log('Test error route hit');
@@ -57,6 +61,8 @@ app.use('/api/auth', authRoutes);
 
 console.log("Setting up Bull Dashboard");
 setupBullDashboard(app);
+
+// New route for roo
 
 // Handle Errors
 app.use((err, req, res, next) => {
