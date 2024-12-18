@@ -13,7 +13,7 @@ import BookingDetails from './pages/BookingDetails'; // Import the new BookingDe
 
 function App() {
   return (
-    <Router>
+    <Router basename="/">
       <Routes>
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
