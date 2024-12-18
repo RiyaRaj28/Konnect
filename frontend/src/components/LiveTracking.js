@@ -83,7 +83,7 @@ const LiveTracking = ({ bookingId, pickup, dropoff }) => {
   const [waypoints, setWaypoints] = useState([]);
 
   useEffect(() => {
-    const socket = io('http://localhost:5000');
+    const socket = io('https://konnect-mxi5.onrender.com');
     console.log("SOCKET", socket)
 
     socket.emit('joinBooking', bookingId);

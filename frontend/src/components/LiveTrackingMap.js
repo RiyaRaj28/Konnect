@@ -26,7 +26,7 @@ const LiveTrackingMap = ({ bookingId }) => {
   const [driverLocation, setDriverLocation] = useState(null);
 
   useEffect(() => {
-    const socket = io('http://localhost:5000'); // Replace with your backend URL
+    const socket = io('https://konnect-mxi5.onrender.com'); // Replace with your backend URL
 
     socket.emit('joinBooking', bookingId);
 
