@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api'; // Replace with your backend URL
+const API_URL = 'https://konnect-mxi5.onrender.com/api'; // Replace with your backend URL
 
 const api = axios.create({
   baseURL: API_URL,

@@ -43,6 +43,9 @@ app.use((req, res, next) => {
 console.log("Connecting to MongoDB:", process.env.MONGO_URI);
 connectDB();
 
+console.log('MONGO_URI being used:', process.env.MONGO_URI);
+console.log('PORT:', process.env.PORT);
+
 app.get('/', (req, res) => {
   res.json({ message: 'Backend is live' });
 });
